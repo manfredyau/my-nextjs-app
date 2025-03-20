@@ -30,7 +30,7 @@ const SignUpPage = () => {
       return { message: error };
     } else if (user) {
       await loginUser(email, password);
-      redirect("/login");
+      redirect("/");
     }
   };
   return <SignUp action={action} />;

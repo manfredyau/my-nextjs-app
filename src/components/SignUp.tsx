@@ -1,6 +1,7 @@
 "use client";
 import React, { useActionState } from "react";
 import Form from "next/form";
+import { Loader2 } from "lucide-react";
 
 const initialState = {
   message: "",
@@ -82,13 +83,20 @@ const SignUp = ({ action }: SignupProps) => {
         {/*  Submit  */}
         <button
           className={
-            "w-full bg-rose-500 text-white rounded-md hover:bg-rose-700 transition-colors font-medium " +
+            "w-full bg-rose-500 py-3 text-white rounded-md hover:bg-rose-700 transition-colors font-medium " +
             `flex items-center justify-center gap-2 ${isPending ? "opacity-50 cursor-not-allowed" : ""}`
           }
           type={"submit"}
           disabled={isPending}
         >
-          Submit
+          {isPending ? (
+            <React.Fragment>
+              <Loader2 className={"h-4 w-4 animate-spin"} />
+              CREATING ACCOUNT...
+            </React.Fragment>
+          ) : (
+            "Create Account"
+          )}
         </button>
       </div>
     </Form>
