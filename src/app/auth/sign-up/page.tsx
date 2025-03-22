@@ -4,20 +4,20 @@ import { redirect } from "next/navigation";
 import SignUp from "@/components/SignUp";
 import z from "zod";
 
-const signupSchema = z.object({
+const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
 
-const SignUpPage = () => {
-  const { user } = use(getCurrentSession());
+const SignUpPage = async () => {
+  const { user } = await getCurrentSession();
   if (user) {
     redirect("/");
   }
 
   const action = async (prevState: any, formData: FormData) => {
     "use server";
-    const parsed = signupSchema.safeParse(Object.fromEntries(formData));
+    const parsed = signUpSchema.safeParse(Object.fromEntries(formData));
     if (!parsed.success) {
       return {
         message: "Invalid form data",

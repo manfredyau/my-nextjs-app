@@ -7,30 +7,27 @@ const initialState = {
   message: "",
 };
 
-type SignupProps = {
+type SignInProps = {
   action: (
     prevState: any,
     formData: FormData,
   ) => Promise<{ message: string } | undefined>;
 };
 
-const SignUp = ({ action }: SignupProps) => {
+const SignIn = ({ action }: SignInProps) => {
   const [state, formAction, isPending] = useActionState(action, initialState);
   return (
     <Form
       action={formAction}
       className={"max-w-md mx-auto my-16 p-8 bg-white shadow-md"}
     >
-      <h1 className={"text-2xl font-bold text-center mb-2"}>
-        join the DEAL REVOLUTION
-      </h1>
+      <h1 className={"text-2xl font-bold text-center mb-2"}>Welcome Back!</h1>
       <p className={"text-center text-sm mb-2 text-red-600"}>
         ♨️ LIMITED TIME OFFER! ♨️
       </p>
       <p className={"text-center text-sm mb-2 text-gray-600"}>
-        Sign up now and get 90% OFF your first order!
+        Sign in to access your exclusive member deals.
       </p>
-
       <div className={"space-y-6"}>
         {/*  Email  */}
         <div className={"space-y-2"}>
@@ -66,20 +63,18 @@ const SignUp = ({ action }: SignupProps) => {
               "focus:border-transparent sm:text-sm transition-colors"
             }
             autoComplete={"current-password"}
-            placeholder={"Create your password"}
+            placeholder={"Enter your password"}
           />
         </div>
-
         {/*  Copywriting  */}
         <div className={"text-center"}>
           <p className={"text-xs text-gray-500 mb-2"}>
-            ⚡ Only 3 days left on sale!
+            ⚡ Members save an extra 10% on all orders.
           </p>
           <p className={"text-xs text-gray-500 mb-4"}>
-            ⏰ Offer expires in: 14:00
+            🚚 plug get free shipping on orders over $15.00
           </p>
         </div>
-
         {/*  Submit  */}
         <button
           className={
@@ -92,12 +87,13 @@ const SignUp = ({ action }: SignupProps) => {
           {isPending ? (
             <React.Fragment>
               <Loader2 className={"h-4 w-4 animate-spin"} />
-              CREATING ACCOUNT...
+              SIGNING ACCOUNT...
             </React.Fragment>
           ) : (
-            "Create Account"
+            "Sign In"
           )}
         </button>
+
         {state?.message && state.message.length > 0 && (
           <div className={"text-center"}>
             <span
@@ -114,4 +110,4 @@ const SignUp = ({ action }: SignupProps) => {
   );
 };
 
-export default SignUp;
+export default SignIn;

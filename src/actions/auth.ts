@@ -5,10 +5,11 @@ import {
   encodeHexLowerCase,
 } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
-
+import bcrypt from "bcrypt";
 import type { User, Session } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { cache } from "react";
+import { randomBytes } from "node:crypto";
 
 export async function generateSessionToken(): Promise<string> {
   const bytes = new Uint8Array(20);
@@ -65,7 +66,11 @@ export async function validateSessionToken(
       },
     });
   }
-  return { session, user };
+  const safeUser = {
+    ...user,
+    passwordHash: undefined,
+  };
+  return { session, user: safeUser };
 }
 
 export async function invalidateSession(sessionId: string): Promise<void> {
@@ -81,7 +86,7 @@ export async function invalidateAllSessions(userId: number): Promise<void> {
 }
 
 export type SessionValidationResult =
-  | { session: Session; user: User }
+  | { session: Session; user: SafeUser }
   | { session: null; user: null };
 
 export async function setSessionTokenCookie(
@@ -122,14 +127,14 @@ export const getCurrentSession = cache(
 );
 
 export const hashPassword = async (password: string) => {
-  return encodeHexLowerCase(sha256(new TextEncoder().encode(password)));
+  return await bcrypt.hash(password, 10);
 };
 
 export const verifyPassword = async (
   password: string,
   hashedPassword: string,
 ) => {
-  return (await hashPassword(password)) === hashedPassword;
+  return await bcrypt.compare(password, hashedPassword);
 };
 
 export const registerUser = async (
@@ -196,7 +201,7 @@ export const loginUser = async (email: string, password: string) => {
   };
 };
 
-const logoutUser = async (userId: number) => {
+export const logoutUser = async (userId: number) => {
   const session = await getCurrentSession();
   if (session.session?.id) {
     await invalidateSession(session.session.id);
@@ -204,10 +209,7 @@ const logoutUser = async (userId: number) => {
   await deleteSessionTokenCookie();
 };
 
-type SafeUser = {
-  id: number;
-  email: string;
-};
+export type SafeUser = Omit<User, "passwordHash">;
 
 type AuthResult =
   | {
