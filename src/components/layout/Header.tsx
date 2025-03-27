@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { User } from "@prisma/client";
 import { logoutUser, SafeUser } from "@/actions/auth";
@@ -25,18 +25,25 @@ type HeaderProps = {
 const Header = ({ user }: HeaderProps) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const [prevScrollY, setPrevScrollY] = useState<number>(0);
+  const prevScrollYRef = useRef<number>(0);
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const scrollUp = prevScrollY > currentScrollY;
+      const scrollUp = prevScrollYRef.current > currentScrollY;
+      console.log("prevScrollY", prevScrollYRef.current);
+      console.log("currentScrollY", currentScrollY);
       if (scrollUp) {
+        console.log("scroll up");
         setIsOpen(true);
       } else if (currentScrollY > 100) {
+        console.log("scroll down");
         setIsOpen(false);
       }
 
-      setPrevScrollY(currentScrollY);
+      // setPrevScrollY(currentScrollY);
+      prevScrollYRef.current = currentScrollY;
+      console.log("after setPrevScrollY: ", currentScrollY);
+      console.log("print something");
     };
 
     // setPrevScrollY(window.scrollY)
@@ -44,9 +51,10 @@ const Header = ({ user }: HeaderProps) => {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
+      console.log("remove event listener");
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [prevScrollY]);
+  }, []);
 
   return (
     <header className={"w-full sticky top-0 z-50"}>

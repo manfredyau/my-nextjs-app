@@ -1,0 +1,34 @@
+[
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string",
+        "title": "title"
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "title": "description"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "slug"
+      }
+    ],
+    "name": "productCategory",
+    "type": "document",
+    "title": "title"
+  }
+]
