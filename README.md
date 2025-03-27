@@ -5,6 +5,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
+# If you need to debug with IDE like VSCode, WebStorm, etc.
+# You can use `next dev` instead of `next dev --turbopack`
 npm run dev
 # or
 yarn dev
