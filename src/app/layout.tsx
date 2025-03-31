@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import React from "react";
 import { getCurrentSession } from "@/actions/auth";
+import { SanityLive } from "@/sanity/lib/live";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default async function RootLayout({
       >
         <Header user={user} />
         {children}
+        <SanityLive />
       </body>
     </html>
   );

@@ -1,0 +1,110 @@
+[
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string",
+        "title": "title"
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "title": "description"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "slug"
+      }
+    ],
+    "name": "productCategory",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string",
+        "title": "title"
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "title": "description"
+      },
+      {
+        "name": "price",
+        "type": "number",
+        "title": "price"
+      },
+      {
+        "name": "image",
+        "type": "image",
+        "title": "image"
+      },
+      {
+        "to": [
+          {
+            "type": "productCategory"
+          }
+        ],
+        "name": "category",
+        "type": "reference"
+      }
+    ],
+    "name": "product",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "name": "code",
+        "type": "string"
+      },
+      {
+        "name": "discountPercentage",
+        "type": "number",
+        "title": "Discount Percentage(%)"
+      },
+      {
+        "name": "expiryDate",
+        "type": "date"
+      }
+    ],
+    "name": "promotionCode",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "to": [
+          {
+            "type": "promotionCode"
+          }
+        ],
+        "name": "code",
+        "type": "reference"
+      }
+    ],
+    "name": "promotionCampaign",
+    "type": "document"
+  }
+]
