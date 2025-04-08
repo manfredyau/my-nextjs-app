@@ -30,20 +30,14 @@ const Header = ({ user }: HeaderProps) => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const scrollUp = prevScrollYRef.current > currentScrollY;
-      console.log("prevScrollY", prevScrollYRef.current);
-      console.log("currentScrollY", currentScrollY);
       if (scrollUp) {
-        console.log("scroll up");
         setIsOpen(true);
       } else if (currentScrollY > 100) {
-        console.log("scroll down");
         setIsOpen(false);
       }
 
       // setPrevScrollY(currentScrollY);
       prevScrollYRef.current = currentScrollY;
-      console.log("after setPrevScrollY: ", currentScrollY);
-      console.log("print something");
     };
 
     // setPrevScrollY(window.scrollY)
@@ -51,7 +45,6 @@ const Header = ({ user }: HeaderProps) => {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      console.log("remove event listener");
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
