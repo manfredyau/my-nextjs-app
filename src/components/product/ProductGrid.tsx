@@ -1,6 +1,6 @@
-import React from "react";
-import { Product } from "@/sanity.types";
-import ProductItem from "@/components/product/ProductItem";
+import React from 'react';
+import { Product } from '@/sanity.types';
+import ProductItem from '@/components/product/ProductItem';
 
 type ProductGridProps = {
   products: Product[];

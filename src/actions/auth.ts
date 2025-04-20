@@ -1,15 +1,14 @@
-"use server";
-import { cookies } from "next/headers";
+'use server';
+import { cookies } from 'next/headers';
 import {
   encodeBase32LowerCaseNoPadding,
   encodeHexLowerCase,
-} from "@oslojs/encoding";
-import { sha256 } from "@oslojs/crypto/sha2";
-import bcrypt from "bcrypt";
-import type { User, Session } from "@prisma/client";
-import prisma from "@/lib/prisma";
-import { cache } from "react";
-import { randomBytes } from "node:crypto";
+} from '@oslojs/encoding';
+import { sha256 } from '@oslojs/crypto/sha2';
+import bcrypt from 'bcrypt';
+import type { Session, User } from '@prisma/client';
+import prisma from '@/lib/prisma';
+import { cache } from 'react';
 
 export async function generateSessionToken(): Promise<string> {
   const bytes = new Uint8Array(20);
@@ -20,7 +19,7 @@ export async function generateSessionToken(): Promise<string> {
 
 export async function createSession(
   token: string,
-  userId: number,
+  userId: number
 ): Promise<Session> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
   const session: Session = {
@@ -35,7 +34,7 @@ export async function createSession(
 }
 
 export async function validateSessionToken(
-  token: string,
+  token: string
 ): Promise<SessionValidationResult> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
   const result = (await prisma.session.findUnique({
@@ -91,39 +90,39 @@ export type SessionValidationResult =
 
 export async function setSessionTokenCookie(
   token: string,
-  expiresAt: Date,
+  expiresAt: Date
 ): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set("session", token, {
+  cookieStore.set('session', token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
     expires: expiresAt,
-    path: "/",
+    path: '/',
   });
 }
 
 export async function deleteSessionTokenCookie(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set("session", "", {
+  cookieStore.set('session', '', {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 0,
-    path: "/",
+    path: '/',
   });
 }
 
 export const getCurrentSession = cache(
   async (): Promise<SessionValidationResult> => {
     const cookieStore = await cookies();
-    const token = cookieStore.get("session")?.value ?? null;
+    const token = cookieStore.get('session')?.value ?? null;
     if (token === null) {
       return { session: null, user: null };
     }
     const result = await validateSessionToken(token);
     return result;
-  },
+  }
 );
 
 export const hashPassword = async (password: string) => {
@@ -132,14 +131,14 @@ export const hashPassword = async (password: string) => {
 
 export const verifyPassword = async (
   password: string,
-  hashedPassword: string,
+  hashedPassword: string
 ) => {
   return await bcrypt.compare(password, hashedPassword);
 };
 
 export const registerUser = async (
   email: string,
-  password: string,
+  password: string
 ): Promise<AuthResult> => {
   const passwordHash = await hashPassword(password);
   try {
@@ -161,7 +160,7 @@ export const registerUser = async (
   } catch (error) {
     return {
       user: null,
-      error: "Failed to register user",
+      error: 'Failed to register user',
     };
   }
 };
@@ -174,7 +173,7 @@ export const loginUser = async (email: string, password: string) => {
   if (!user) {
     return {
       user: null,
-      error: "User not found",
+      error: 'User not found',
     };
   }
 
@@ -182,7 +181,7 @@ export const loginUser = async (email: string, password: string) => {
   if (!passwordValid) {
     return {
       user: null,
-      error: "Invalid password",
+      error: 'Invalid password',
     };
   }
 
@@ -209,7 +208,7 @@ export const logoutUser = async (userId: number) => {
   await deleteSessionTokenCookie();
 };
 
-export type SafeUser = Omit<User, "passwordHash">;
+export type SafeUser = Omit<User, 'passwordHash'>;
 
 type AuthResult =
   | {

@@ -1,10 +1,9 @@
-"use client";
-import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { User } from "@prisma/client";
-import { logoutUser, SafeUser } from "@/actions/auth";
-import { router } from "next/client";
-import { useRouter } from "next/navigation";
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { logoutUser, SafeUser } from '@/actions/auth';
+import { useRouter } from 'next/navigation';
+import HeaderSearchBar from '@/components/layout/HeaderSearchBar';
 
 const AnnouncementBar = () => {
   return (
@@ -20,9 +19,12 @@ const AnnouncementBar = () => {
 
 type HeaderProps = {
   user: SafeUser | null;
+  categorySelector: React.ReactNode;
 };
 
-const Header = ({ user }: HeaderProps) => {
+// We have to pass <HeaderCategorySelector /> as a prop instead of importing it since it's an async functional component
+// (what we need is a sync component), we cannot import it directly in 'use client' context.
+const Header = ({ user, categorySelector }: HeaderProps) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const prevScrollYRef = useRef<number>(0);
@@ -42,94 +44,82 @@ const Header = ({ user }: HeaderProps) => {
 
     // setPrevScrollY(window.scrollY)
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
   return (
-    <header className={"w-full sticky top-0 z-50"}>
+    <header className={'w-full sticky top-0 z-50'}>
       <div
         className={`w-full transform transition-transform duration-300 ease-in-out 
-                ${isOpen ? "translate-y-0" : "-translate-y-full"}`}
+                ${isOpen ? 'translate-y-0' : '-translate-y-full'}`}
       >
         <AnnouncementBar />
         <div
           className={
-            "w-full flex justify-between items-center py-3 sm:py-4 bg-white/80 shadow-sm border-b border-gray-100 backdrop-blur-sm"
+            'w-full flex justify-between items-center py-3 sm:py-4 bg-white/80 shadow-sm border-b border-gray-100 backdrop-blur-sm'
           }
         >
           <div
             className={
-              "flex justify-between items-center container mx-auto px-8"
+              'flex justify-between items-center container mx-auto px-8'
             }
           >
             <div
               className={
-                "flex flex-1 justify-start items-center gap-4 sm:gap-6"
+                'flex flex-1 justify-start items-center gap-4 sm:gap-6'
               }
             >
-              <button className={"text-gray-700 hover:text-gray-900 md:hidden"}>
+              <button className={'text-gray-700 hover:text-gray-900 md:hidden'}>
                 <svg
-                  xmlns={"http://www.w3.org/2000/svg"}
-                  className={"h-5 w-5 sm:h-6 sm:w-6"}
-                  fill={"none"}
-                  viewBox={"0 0 24 24"}
-                  stroke={"currentColor"}
+                  xmlns={'http://www.w3.org/2000/svg'}
+                  className={'h-5 w-5 sm:h-6 sm:w-6'}
+                  fill={'none'}
+                  viewBox={'0 0 24 24'}
+                  stroke={'currentColor'}
                 >
                   <path
-                    strokeLinecap={"round"}
-                    strokeLinejoin={"round"}
+                    strokeLinecap={'round'}
+                    strokeLinejoin={'round'}
                     strokeWidth={2}
-                    d={"M4 6h16M4 12h16M4 18h16"}
+                    d={'M4 6h16M4 12h16M4 18h16'}
                   />
                 </svg>
               </button>
               <nav
-                className={"hidden md:flex gap-4 lg:gap-6 text-sm font-medium"}
+                className={'hidden md:flex gap-4 lg:gap-6 text-sm font-medium'}
               >
-                <Link href={"#"}>Shop</Link>
-                <Link href={"#"}>New Arrivals</Link>
-                <Link href={"#"}>Sale</Link>
+                {/*<Link href={'#'}>Shop</Link>*/}
+                {/*<Link href={'#'}>New Arrivals</Link>*/}
+                {/*<Link href={'#'}>Sale</Link>*/}
+                {/* DO NOT use <HeaderCategorySelector />, use the prop instead */}
+                {categorySelector}
               </nav>
             </div>
-            <Link href={"#"} className={"absolute left-1/2 -translate-x-1/2"}>
+            <Link href={'#'} className={'absolute left-1/2 -translate-x-1/2'}>
               <span
-                className={"text-xl sm:text-2xl font-bold tracking-tighter"}
+                className={'text-xl sm:text-2xl font-bold tracking-tighter'}
               >
                 DEAL
               </span>
             </Link>
             <div
-              className={"flex flex-1 justify-end items-center gap-2 sm:gap-4"}
+              className={'flex flex-1 justify-end items-center gap-2 sm:gap-4'}
             >
-              <button
-                className={"text-gray-700 hover:text-gray-900 hidden sm:block"}
-              >
-                <svg
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  className={"h-5 w-5 sm:h-6 sm:w-6"}
-                >
-                  <path
-                    d="M20 4H4v2h16V4zm0 4H4v2h16V8zm-8 4H4v2h8v-2zm8 0h-6v6h6v2h2v-2h-2v-6zm-4 4v-2h2v2h-2zm-4 0H4v2h8v-2z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </button>
+              <HeaderSearchBar />
               {user ? (
-                <div className={"flex items-center gap-2 sm:gap-4"}>
-                  <span className={"text-sm text-gray-700 hidden md:block"}>
+                <div className={'flex items-center gap-2 sm:gap-4'}>
+                  <span className={'text-sm text-gray-700 hidden md:block'}>
                     {user.email}
                   </span>
                   <Link
-                    href={"#"}
+                    href={'#'}
                     className={
-                      "text-xs sm:text-sm font-medium " +
-                      "text-gray-700  hover:text-gray-900"
+                      'text-xs sm:text-sm font-medium ' +
+                      'text-gray-700  hover:text-gray-900'
                     }
                     onClick={async (e) => {
                       e.preventDefault();
@@ -143,17 +133,17 @@ const Header = ({ user }: HeaderProps) => {
               ) : (
                 <React.Fragment>
                   <Link
-                    href={"/auth/sign-in"}
+                    href={'/auth/sign-in'}
                     className={
-                      "text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900"
+                      'text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900'
                     }
                   >
                     Sign In
                   </Link>
                   <Link
-                    href={"/auth/sign-up"}
+                    href={'/auth/sign-up'}
                     className={
-                      "text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900"
+                      'text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900'
                     }
                   >
                     Sign Up
@@ -162,7 +152,7 @@ const Header = ({ user }: HeaderProps) => {
               )}
               <button
                 className={
-                  "text-gray-700 hover:text-gray-900 sm:block relative"
+                  'text-gray-700 hover:text-gray-900 sm:block relative'
                 }
               >
                 <svg
