@@ -1,6 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
+Before running the project, make sure you have NOT run any proxy programs like Clash, Verge, etc.
+Or you'll get some errors.
 
 First, run the development server:
 

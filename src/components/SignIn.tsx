@@ -1,5 +1,5 @@
 "use client";
-import React, { useActionState } from "react";
+import React, { Suspense, useActionState } from "react";
 import Form from "next/form";
 import { Loader2 } from "lucide-react";
 
@@ -84,14 +84,24 @@ const SignIn = ({ action }: SignInProps) => {
           type={"submit"}
           disabled={isPending}
         >
-          {isPending ? (
-            <React.Fragment>
-              <Loader2 className={"h-4 w-4 animate-spin"} />
-              SIGNING ACCOUNT...
-            </React.Fragment>
-          ) : (
-            "Sign In"
-          )}
+          {/*{isPending ? (*/}
+          {/*  <React.Fragment>*/}
+          {/*    <Loader2 className={"h-4 w-4 animate-spin"} />*/}
+          {/*    SIGNING ACCOUNT...*/}
+          {/*  </React.Fragment>*/}
+          {/*) : (*/}
+          {/*  "Sign In"*/}
+          {/*)}*/}
+          <Suspense
+            fallback={
+              <React.Fragment>
+                <Loader2 className={"h-4 w-4 animate-spin"} />
+                SIGNING ACCOUNT...
+              </React.Fragment>
+            }
+          >
+            Sign In
+          </Suspense>
         </button>
 
         {state?.message && state.message.length > 0 && (
