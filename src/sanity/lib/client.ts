@@ -11,6 +11,12 @@ export const client = createClient({
   useCdn: true, // Set to false if statically generating pages, using ISR or tag-based revalidation
 });
 
+export const getProductById = async (id: string) => {
+  // Make sure the _type here matches the type defined in sanity.types.ts
+  const query = `*[_type == "product" && _id == $id][0]`;
+  const product = (await sanityFetch({ query, params: { id } })).data;
+  return product as Product;
+};
 export const getAllProducts: () => Promise<Product[]> = async () => {
   // Make sure the _type here matches the type defined in sanity.types.ts
   const query = '*[_type == "product"]';
