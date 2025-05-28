@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { Product } from '@/sanity.types';
 import { Loader2 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import { useCartStore } from '@/stores/cart-store';
+import { useShallow } from 'zustand/react/shallow';
+import { urlFor } from '@/sanity/lib/image';
 
 type AddToCartButtonProps = {
   product: Product;
@@ -13,12 +16,28 @@ const AddToCartButton = ({ product }: AddToCartButtonProps) => {
     return null;
   }
 
+  const { addItem, open } = useCartStore(
+    useShallow((state) => ({
+      addItem: state.addItem,
+      open: state.open,
+    }))
+  );
+
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleAddToCart() {
+    if (!product.title || !product.price || !product.image) {
+      return;
+    }
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
     // Add item to cart logic here
+    await addItem({
+      id: product._id,
+      title: product.title,
+      price: product.price,
+      image: urlFor(product.image).url(),
+      quantity: 1
+    });
     setIsLoading(false);
   }
 

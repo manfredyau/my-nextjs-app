@@ -11,7 +11,13 @@ export const createCart = async () => {
     data: {
       id: crypto.randomUUID(),
       // If there is no user, we don't need to connect it to the cart. Just keep it as undefined.
-      user: user ? { connect: { id: user.id } } : undefined,
+      user: user
+        ? {
+            connect: {
+              id: user.id,
+            },
+          }
+        : undefined,
       items: {
         create: [],
       },
@@ -26,7 +32,9 @@ export const getOrCreateCart = async (cartId?: string | null) => {
   const user = (await getCurrentSession()).user;
   if (user) {
     const cart = await prisma.cart.findUnique({
-      where: { userId: user.id },
+      where: {
+        userId: user.id,
+      },
       include: {
         items: true,
       },
@@ -42,7 +50,9 @@ export const getOrCreateCart = async (cartId?: string | null) => {
   }
 
   const cart = await prisma.cart.findUnique({
-    where: { id: cartId },
+    where: {
+      id: cartId,
+    },
     include: {
       items: true,
     },
@@ -76,12 +86,16 @@ export const updateCartItem = async (
     // If quantity is 0, delete the item
     if (data.quantity === 0) {
       await prisma.cartLineItem.delete({
-        where: { id: existingItem.id },
+        where: {
+          id: existingItem.id,
+        },
       });
       // Or update the quantity with the new value
     } else if (data.quantity && data.quantity > 0) {
       await prisma.cartLineItem.update({
-        where: { id: existingItem.id },
+        where: {
+          id: existingItem.id,
+        },
         data: {
           quantity: data.quantity,
         },
@@ -107,6 +121,7 @@ export const updateCartItem = async (
   return getOrCreateCart(cartId);
 };
 
+// cartId means the anonymous cart id
 export const syncCartWithUser = async (cartId: string | null) => {
   const { user } = await getCurrentSession();
 
@@ -114,7 +129,96 @@ export const syncCartWithUser = async (cartId: string | null) => {
     return null;
   }
 
-  const existingUserCart = getOrCreateCart(cartId);
+  const existingUserCart = await prisma.cart.findUnique({
+    where: {
+      userId: user.id,
+    },
+    include: {
+      items: true,
+    },
+  });
 
+  const existingAnonymousCart = cartId
+    ? await prisma.cart.findUnique({
+        where: {
+          id: cartId,
+        },
+        include: {
+          items: true,
+        },
+      })
+    : null;
 
+  if (!cartId && existingUserCart) {
+    return existingUserCart;
+  }
+
+  if (!cartId || (!existingAnonymousCart && !existingUserCart)) {
+    return createCart();
+  }
+
+  if (existingUserCart && existingUserCart.id === cartId) {
+    return existingUserCart;
+  }
+
+  if (!existingUserCart) {
+    return prisma.cart.update({
+      where: {
+        id: cartId,
+      },
+      data: {
+        userId: user.id,
+      },
+      include: {
+        items: true,
+      },
+    });
+  }
+
+  // If there is no anonymous cart, we don't need to merge it with the user's cart. Just return the user's cart.
+  if (!existingAnonymousCart) {
+    return existingUserCart;
+  }
+
+  // Finally, merge the anonymous cart with the user's cart.
+  for (const item of existingAnonymousCart?.items) {
+    const existingItem = existingUserCart.items.find(
+      (i) => i.sanityProductId === item.sanityProductId
+    );
+
+    if (existingItem) {
+      // Update the quantity with the new value
+      await prisma.cartLineItem.update({
+        where: {
+          id: existingItem.id,
+        },
+        data: {
+          quantity: item.quantity + existingItem.quantity,
+        },
+      });
+    } else {
+      // Create a new item
+      await prisma.cartLineItem.create({
+        data: {
+          id: crypto.randomUUID(),
+          cartId: existingUserCart.id,
+          sanityProductId: item.sanityProductId,
+          quantity: item.quantity,
+          title: item.title,
+          price: item.price,
+          image: item.image,
+        },
+      });
+    }
+  }
+  // Don't remember to delete the anonymous cart because it's not needed anymore.
+  await prisma.cart.delete({
+    where: {
+      id: cartId,
+    },
+  });
+
+  // Make sure to fetch the data from database(but not from cache or React state) as soon as possible
+  revalidatePath('/');
+  return getOrCreateCart(existingUserCart.id);
 };

@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { syncCartWithUser, updateCartItem } from '@/actions/cart-actions';
+import {
+  getOrCreateCart,
+  syncCartWithUser,
+  updateCartItem,
+} from '@/actions/cart-actions';
 import prisma from '@/lib/prisma';
 
 export type CartItem = {
@@ -18,7 +22,7 @@ export type CartStore = {
   isOpen: boolean;
   cartId: string | null;
   setStore: (store: Partial<CartStore>) => void;
-  addItem: (item: CartItem) => Promise<void | CartStore>;
+  addItem: (item: CartItem) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   updateQuantity: (id: string, quantity: number) => Promise<void>;
   clearCart: () => void;
@@ -40,26 +44,47 @@ export const useCartStore = create<CartStore>()(
       setStore: (store: Partial<CartStore>) => set(store),
       addItem: async (item: CartItem) => {
         // We need to judge if the cartId is null or not, if it's null, we just return simply.
-        const cartId = get().cartId;
+        const { cartId, items } = get();
         if (!cartId) {
           return;
         }
+
+        // Perhaps there is already an item that has the same id, we need to add the quantity instead of creating a new item.
+        const existingItem = items.find((i) => i.id === item.id);
+        const existingQuantity = existingItem?.quantity || 0;
+        const addedQuantity = item.quantity + existingQuantity;
 
         // Update the database
         const updatedCart = await updateCartItem(cartId, item.id, {
           title: item.title,
           price: item.price,
-          quantity: item.quantity,
+          quantity: addedQuantity,
           image: item.image,
         });
 
         // Update the store state
         set((prevState) => {
-          return {
-            ...prevState,
-            cartId: updatedCart.id,
-            items: [...prevState.items, item],
-          };
+          const existingItem = prevState.items.find((i) => i.id === item.id);
+          if (existingItem) {
+            return {
+              ...prevState,
+              cartId: updatedCart.id,
+              items: prevState.items.map((i) =>
+                i.id === item.id
+                  ? {
+                      ...i,
+                      quantity: i.quantity + item.quantity,
+                    }
+                  : i
+              ),
+            };
+          } else {
+            return {
+              ...prevState,
+              cartId: updatedCart.id,
+              items: [...prevState.items, item],
+            };
+          }
         });
       },
       removeItem: async (id: string) => {
@@ -124,11 +149,24 @@ export const useCartStore = create<CartStore>()(
       },
       syncWithUser: async () => {
         const { cartId } = get();
-        if (!cartId) {
-
+        if (cartId) {
+          const syncedCart = await syncCartWithUser(cartId);
+          // Make sure the user is logged in before syncing the cart, or syncedCard will be null.
+          if (syncedCart?.id) {
+            set((prevState) => ({
+              ...prevState,
+              cartId: syncedCart.id,
+              items: syncedCart.items,
+            }));
+          }
+        } else {
+          const newCart = await getOrCreateCart();
+          set((prevState) => ({
+            ...prevState,
+            cartId: newCart.id,
+            items: newCart.items,
+          }));
         }
-
-        const syncedCart = await syncCartWithUser(cartId);
       },
       getTotalItems: () => {
         const items = get().items;
