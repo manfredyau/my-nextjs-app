@@ -2,7 +2,7 @@ import React from "react";
 import { getCurrentSession, loginUser } from "@/actions/auth";
 import { redirect } from "next/navigation";
 import z from "zod";
-import SignIn from "@/components/SignIn";
+import SignIn from "@/components/auth/SignIn";
 
 const signInSchema = z.object({
   email: z.string().email(),

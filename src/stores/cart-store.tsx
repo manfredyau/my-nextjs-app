@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, PersistStorage, StorageValue } from 'zustand/middleware';
 import {
   getOrCreateCart,
   syncCartWithUser,
   updateCartItem,
 } from '@/actions/cart-actions';
-import prisma from '@/lib/prisma';
+import Cookies from 'js-cookie';
 
 export type CartItem = {
   // This id stands for sanityProductid
@@ -33,6 +33,17 @@ export type CartStore = {
   getTotalItems: () => number;
   getTotalPrice: () => number;
 };
+const cookieStorage: PersistStorage<CartStore> = {
+  setItem: (key: string, value: StorageValue<CartStore>) => {
+    Cookies.set(key, JSON.stringify(value), { expires: 7 }); // 设置过期时间为7天
+  },
+  getItem: (key: string) => {
+    return JSON.parse(Cookies.get(key) || 'null') as StorageValue<CartStore> | null;
+  },
+  removeItem: (key: string) => {
+    Cookies.remove(key);
+  },
+};
 
 export const useCartStore = create<CartStore>()(
   persist(
@@ -51,6 +62,7 @@ export const useCartStore = create<CartStore>()(
 
         // Perhaps there is already an item that has the same id, we need to add the quantity instead of creating a new item.
         const existingItem = items.find((i) => i.id === item.id);
+        // If the item that you want to add has been in cart, just use its quantity simply, otherwise set it to 0.
         const existingQuantity = existingItem?.quantity || 0;
         const addedQuantity = item.quantity + existingQuantity;
 
@@ -178,8 +190,9 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: 'cart',
+      name: 'cart-storage',
       skipHydration: true,
+      storage: cookieStorage,
     }
   )
 );

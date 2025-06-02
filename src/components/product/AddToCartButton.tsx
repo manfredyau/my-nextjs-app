@@ -39,6 +39,7 @@ const AddToCartButton = ({ product }: AddToCartButtonProps) => {
       quantity: 1
     });
     setIsLoading(false);
+    open();
   }
 
   return (

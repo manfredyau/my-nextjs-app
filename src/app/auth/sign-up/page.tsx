@@ -1,7 +1,7 @@
 import React, { use } from "react";
 import { getCurrentSession, loginUser, registerUser } from "@/actions/auth";
 import { redirect } from "next/navigation";
-import SignUp from "@/components/SignUp";
+import SignUp from "@/components/auth/SignUp";
 import z from "zod";
 
 const signUpSchema = z.object({
