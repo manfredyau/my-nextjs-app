@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { logoutUser, SafeUser } from '@/actions/auth';
 import { useRouter } from 'next/navigation';
 import HeaderSearchBar from '@/components/layout/HeaderSearchBar';
+import { useCartStore } from '@/stores/cart-store';
+import { useShallow } from 'zustand/react/shallow';
 
 const AnnouncementBar = () => {
   return (
@@ -28,6 +30,16 @@ const Header = ({ user, categorySelector }: HeaderProps) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const prevScrollYRef = useRef<number>(0);
+
+  // You'll discover that <Header> re-renders once you click the button "Add to Cart",
+  // because the function revalidatePath in car-actions.ts will be called.
+  const { open, getTotalItems, clearPersistedData } = useCartStore(
+    useShallow((state) => ({
+      open: state.open,
+      getTotalItems: state.getTotalItems,
+      clearPersistedData: state.clearPersistedData,
+    }))
+  );
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -124,6 +136,7 @@ const Header = ({ user, categorySelector }: HeaderProps) => {
                     onClick={async (e) => {
                       e.preventDefault();
                       await logoutUser(user.id);
+                      clearPersistedData();
                       router.refresh();
                     }}
                   >
@@ -151,6 +164,9 @@ const Header = ({ user, categorySelector }: HeaderProps) => {
                 </React.Fragment>
               )}
               <button
+                onClick={() => {
+                  open();
+                }}
                 className={
                   'text-gray-700 hover:text-gray-900 sm:block relative'
                 }
@@ -173,7 +189,7 @@ const Header = ({ user, categorySelector }: HeaderProps) => {
                   className="absolute -top-1 -right-1 bg-black text-white text-[10px]
                                     sm:text-xs w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center"
                 >
-                  0
+                  {getTotalItems()}
                 </span>
               </button>
             </div>

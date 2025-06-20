@@ -32,13 +32,16 @@ export type CartStore = {
   syncWithUser: () => Promise<void>;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  clearPersistedData: () => void;
 };
 const cookieStorage: PersistStorage<CartStore> = {
   setItem: (key: string, value: StorageValue<CartStore>) => {
     Cookies.set(key, JSON.stringify(value), { expires: 7 }); // 设置过期时间为7天
   },
   getItem: (key: string) => {
-    return JSON.parse(Cookies.get(key) || 'null') as StorageValue<CartStore> | null;
+    return JSON.parse(
+      Cookies.get(key) || 'null'
+    ) as StorageValue<CartStore> | null;
   },
   removeItem: (key: string) => {
     Cookies.remove(key);
@@ -85,7 +88,7 @@ export const useCartStore = create<CartStore>()(
                 i.id === item.id
                   ? {
                       ...i,
-                      quantity: i.quantity + item.quantity,
+                      quantity: addedQuantity,
                     }
                   : i
               ),
@@ -187,6 +190,16 @@ export const useCartStore = create<CartStore>()(
       getTotalPrice: () => {
         const items = get().items;
         return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      },
+      clearPersistedData: () => {
+        Cookies.remove('cart-storage');
+        set((prevState) => ({
+          ...prevState,
+          items: [],
+          isLoaded: false,
+          isOpen: false,
+          cartId: null,
+        }));
       },
     }),
     {

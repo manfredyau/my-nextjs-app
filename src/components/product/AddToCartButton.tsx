@@ -36,7 +36,7 @@ const AddToCartButton = ({ product }: AddToCartButtonProps) => {
       title: product.title,
       price: product.price,
       image: urlFor(product.image).url(),
-      quantity: 1
+      quantity: 1,
     });
     setIsLoading(false);
     open();
@@ -53,7 +53,7 @@ const AddToCartButton = ({ product }: AddToCartButtonProps) => {
       {isLoading ? (
         <>
           <Loader2 className="w-6 h-6 animate-spin" />
-          <span>Adding to cart...</span>
+          <span className="fixed">Adding to cart...</span>
         </>
       ) : (
         <>Add to cart - {formatPrice(product.price)}</>
