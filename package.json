@@ -22,7 +22,7 @@
     "esbuild": "^0.25.1",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.483.0",
-    "next": "^15.2.4",
+    "next": "15.2.8",
     "next-sanity": "^9.9.6",
     "prettier": "^3.5.3",
     "prisma": "^6.4.1",
