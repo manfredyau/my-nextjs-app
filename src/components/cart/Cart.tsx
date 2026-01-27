@@ -37,14 +37,14 @@ const Cart = () => {
 
   useEffect(() => {
     const initCart = async () => {
-      // Take the persisted cart data from local storage
-      await useCartStore.persist.rehydrate();
       await syncWithUser();
       setLoaded(true);
     };
 
-    initCart();
-  }, []);
+	    initCart().catch((error) => {
+	      console.error('Failed to initialize cart:', error);
+	    });
+  }, [syncWithUser, setLoaded]);
 
   const totalPrice = getTotalPrice();
 
